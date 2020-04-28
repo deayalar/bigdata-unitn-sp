@@ -36,3 +36,6 @@ def hello_world(request):
     chart = get_json_chart()
     #for doc in db.collection('global').stream():
     #    print(u'{} => {}'.format(doc.id, doc.to_dict()))
+
+
+"This is just a change"
