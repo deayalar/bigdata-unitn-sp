@@ -51,7 +51,7 @@ def get_chart_item(country, date):
         logger.error("Cannot get csv %s, %s" % (country, date))
 
 def get_tuple_batches(countries, dates, batch_size):
-    tuples_list = [(c,d) for c in countries[:2] for d in dates[2:4]]
+    tuples_list = [(c,d) for c in countries[:10] for d in dates]
     batches = [tuples_list[i:i + batch_size] for i in range(0, len(tuples_list), batch_size)]  
     return  batches
 
@@ -77,7 +77,7 @@ def save_batch(countries, dates, batch_size=25):
         end = time.time()
         logger.info("Elapsed %.3f secs Last %s %s" % ((end - start), country, date))
         charts_to_save = []
-        return unprocessed
+    return unprocessed
 
 def retry_unprocessed(unprocessed):
     new_unprocessed = []
