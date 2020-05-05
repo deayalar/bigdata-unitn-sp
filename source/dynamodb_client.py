@@ -18,21 +18,14 @@ for handler in logging.root.handlers[:]:
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', filename="load.log", level=logging.INFO)
 logger = logging.getLogger('insert')
 
-class ChartsLoader():
-    def __init__(self, base_url='https://spotifycharts.com', timeframe="weekly", local=True, retry_unprocessed=True):
-        if not (timeframe == "weekly" or timeframe == "daily"):
-            raise ValueError("timeframe must be 'daily' or 'weekly'")
+class Scrapper():
+    def __init__(self, base_url='https://spotifycharts.com'):
         self.BASE_URL = base_url
-        self.timeframe = timeframe
         self.DOWNLOAD_URL_PATTERN = self.BASE_URL + "/regional/{country}/{timeframe}/{day}/download"
-        self.dao = DynamoDAO(local)
-        self.dao.create_charts_table(self.timeframe)
-        self.retry_unprocessed =retry_unprocessed
-        self.unprocessed_items = []
         self.exclude=["ad", "cy", "mc"] #Countries to exclude because don't have daily charts
-
-    def scrape_selects(self):
-        page = requests.get(self.BASE_URL + '/regional/global/' + self.timeframe + '/latest')
+    
+    def scrape_selects(self, timeframe):
+        page = requests.get(self.BASE_URL + '/regional/global/' + timeframe + '/latest')
         soup = BeautifulSoup(page.content, 'html.parser')
         country_li = soup.find('div',{'data-type':'country'}).find('ul').find_all('li')
         days_li = soup.find('div',{'data-type':'date'}).find('ul').find_all('li')
@@ -40,8 +33,24 @@ class ChartsLoader():
         days = [i['data-value'] for i in days_li]
         return countries, days
 
+    def get_download_url(self, country, timeframe, day):
+        return self.DOWNLOAD_URL_PATTERN.replace("{country}", country).replace("{timeframe}", timeframe).replace("{day}", day)
+
+class ChartsLoader():
+    def __init__(self, timeframe="weekly", local=True, retry_unprocessed=True, threads=None, create_table=True):
+        if not (timeframe == "weekly" or timeframe == "daily"):
+            raise ValueError("timeframe must be 'daily' or 'weekly'")
+        self.timeframe = timeframe
+        self.dao = DynamoDAO(local)
+        self.retry_unprocessed =retry_unprocessed
+        self.unprocessed_items = []
+        self.threads = threads
+        self.scrapper = Scrapper()
+        if create_table:
+            self.dao.create_charts_table(self.timeframe)
+
     def get_chart_item(self, country, day):
-        url = self.DOWNLOAD_URL_PATTERN.replace("{country}", country).replace("{timeframe}", self.timeframe).replace("{day}", day)
+        url = self.scrapper.get_download_url(country, self.timeframe, day)
         try:
             csv_chart = requests.get(url)
             if csv_chart.status_code == 200:
@@ -63,13 +72,14 @@ class ChartsLoader():
             logger.error("Cannot get csv %s, %s url: %s" % (country, day, url))
 
     def get_tuple_batches(self, countries, days, batch_size=25):
-        tuples_list = [(c,d) for c in countries for d in days]
+        tuples_list = [(c,d) for c in countries[:1] for d in days[:1]]
+        #Divide this list in the number of workers/threads we have
         batches = [tuples_list[i:i + batch_size] for i in range(0, len(tuples_list), batch_size)]  
         return  batches
 
     def save_batch(self, countries, days, batch_size=25):
         logger.info("------STARTING BATCH INSERT--------")
-        batches = self.get_tuple_batches(countries, days, batch_size)
+        batches = self.get_tuple_batches(countries, days, batch_size) #Use this as a queue to assign threads
         charts_to_save = []
         self.unprocessed_items = []
         for batch in batches:
@@ -103,7 +113,7 @@ class ChartsLoader():
 
 
     def load(self):
-        self.countries, self.days = self.scrape_selects()
+        self.countries, self.days = self.scrapper.scrape_selects(self.timeframe)
         t_start = time.time()
         self.save_batch(self.countries, self.days)
         t_end = time.time()
