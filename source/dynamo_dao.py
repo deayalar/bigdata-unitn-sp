@@ -24,9 +24,13 @@ class DynamoDAO:
         else:
             self.dynamodb = boto3.resource('dynamodb', region_name=region)
 
-    def create_charts_table(self, table_name):
+    def table_exist(self, table_name):
         if table_name in [t.name for t in list(self.dynamodb.tables.all())]:
-            print("Table was already created")
+            self.table = self.dynamodb.Table(table_name) 
+
+    def create_charts_table(self, table_name):
+        if table_exist(table_name):
+            print('Table "' + table_name + '" already created')
             self.table = self.dynamodb.Table(table_name)
         else:
             try:
