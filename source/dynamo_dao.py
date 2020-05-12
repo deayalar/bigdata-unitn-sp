@@ -24,45 +24,45 @@ class DynamoDAO:
         else:
             self.dynamodb = boto3.resource('dynamodb', region_name=region)
 
-    def table_exist(self, table_name):
+    def get_or_create(self, table_name):
         if table_name in [t.name for t in list(self.dynamodb.tables.all())]:
-            self.table = self.dynamodb.Table(table_name) 
-
-    def create_charts_table(self, table_name):
-        if table_exist(table_name):
             print('Table "' + table_name + '" already created')
             self.table = self.dynamodb.Table(table_name)
         else:
-            try:
-                self.table = self.dynamodb.create_table(
-                    TableName=table_name,
-                    BillingMode= "PAY_PER_REQUEST",
-                    KeySchema=[
-                        {
-                            'AttributeName': 'country',
-                            'KeyType': 'HASH'  #Partition key
-                        },
-                        {
-                            'AttributeName': 'day',
-                            'KeyType': 'RANGE'  #Sort key
-                        }
-                    ],
-                    AttributeDefinitions=[
-                        {
-                            'AttributeName': 'country',
-                            'AttributeType': 'S'
-                        },
-                        {
-                            'AttributeName': 'day',
-                            'AttributeType': 'S'
-                        }
-                    ]
-                )
-                if not self.local:
-                    time.sleep(10) #Give time to the remote dynamodb to create the table
-                print("Table status:", self.table.table_status)
-            except ClientError:
-                print("Table was not created")
+            self.create_charts_table(table_name)
+
+    def create_charts_table(self, table_name):
+        print('Creating Table "' + table_name)
+        try:
+            self.table = self.dynamodb.create_table(
+                TableName=table_name,
+                BillingMode= "PAY_PER_REQUEST",
+                KeySchema=[
+                    {
+                        'AttributeName': 'country',
+                        'KeyType': 'HASH'  #Partition key
+                    },
+                    {
+                        'AttributeName': 'day',
+                        'KeyType': 'RANGE'  #Sort key
+                    }
+                ],
+                AttributeDefinitions=[
+                    {
+                        'AttributeName': 'country',
+                        'AttributeType': 'S'
+                    },
+                    {
+                        'AttributeName': 'day',
+                        'AttributeType': 'S'
+                    }
+                ]
+            )
+            if not self.local:
+                time.sleep(10) #Give time to the remote dynamodb to create the table
+            print("Table status:", self.table.table_status)
+        except ClientError:
+            print("Table was not created")
     
     def save_item(self, data):
         self.table.put_item(

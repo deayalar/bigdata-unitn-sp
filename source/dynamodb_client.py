@@ -52,10 +52,7 @@ class ChartsLoader():
         self.failed_results = []
         self.batch_size = batch_size
         self.scrapper = Scrapper()
-        if create_table:
-            self.dao.create_charts_table(self.timeframe)
-        else: 
-            self.dao.table_exist(self.timeframe)
+        self.dao.get_or_create(self.timeframe)
 
     def get_chart_item(self, country, day, thread_id=1):
         url = self.scrapper.get_download_url(country, self.timeframe, day)
@@ -74,7 +71,7 @@ class ChartsLoader():
                 chart = {"country": country, "day": day, "songs": songs}
                 return chart
             else:
-                logger.error("Cannot get csv | thread %d: [%s, %s] url: %s" % (thread_id, country, day, url))
+                logger.error("Cannot get csv 404 | thread %d: [%s, %s] url: %s" % (thread_id, country, day, url))
         except Exception as e:
             logger.error("Cannot get csv | thread %d:[%s, %s] url: %s" % (thread_id, country, day, url))
 
@@ -90,6 +87,7 @@ class ChartsLoader():
             start = time.time()
             for country, day in batch:
                 item_tuple = (country, day)
+                #if country in ["il", "th", "ro", "vn", "za", "jp", "in"]:
                 chart = self.get_chart_item(country, day, thread_id)
                 if chart:
                     charts_to_save.append(chart)
@@ -110,7 +108,7 @@ class ChartsLoader():
         return unprocessed_items
 
     def handle_unprocessed(self, unprocessed_items, thread_id=1):
-        logger.info("---Handling unprocessed charts")
+        logger.info("---Handling unprocessed charts thread " + str(thread_id) + " count:" + str(len(unprocessed_items)))
         new_unprocessed = []
         for c, d in unprocessed_items:
             chart = self.get_chart_item(c, d, thread_id)
@@ -145,12 +143,6 @@ class ChartsLoader():
 
 #cl = ChartsLoader(timeframe="weekly", retry_unprocessed=False, local=True)
 cl = ChartsLoader(timeframe="weekly", retry_unprocessed=True, create_table=False,
-                  local=True, batch_size=25, threads=10)
+                  local=False, batch_size=25, threads=10)
 cl.load()
 cl.failed_results
-
-#response = cl.dao.dynamodb.Table('weekly').scan()
-#print(response['Items'])
-
-response = cl.dao.get_chart_by_id("global", "2020-04-30")
-response
