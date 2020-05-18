@@ -140,7 +140,7 @@ class ChartsLoader():
         logger.info("------STARTING BATCH INSERT--------")
         self.countries, self.days = self.scrapper.scrape_selects(self.timeframe)
         t_start = time.time()
-        tuples_list = [(c,d) for c in self.countries[:5] for d in self.days[:10]]
+        tuples_list = [(c,d) for c in self.countries for d in self.days]
         if self.threads:
             logger.info("Processing in %d threads" % self.threads)
             thread_batches = [a.tolist() for a in numpy.array_split(tuples_list, self.threads)]

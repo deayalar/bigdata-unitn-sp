@@ -4,7 +4,7 @@ import secrets
 
 class SqsClient():
     def __init__(self, region='us-west-2'):
-        self.queue_name = "test_standard"
+        self.queue_name = "spotify_ids"
         self.url = "https://sqs.us-west-2.amazonaws.com/585318406306/" + self.queue_name
         self.sqs = boto3.client('sqs')
         self.maxBatchSize = 10
