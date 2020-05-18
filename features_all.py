@@ -57,15 +57,13 @@ type(features)
 len(features)
 #Step4: Send data to dynamo db
 
-songs =["4JpKVNYnVcJ8tuMKjAj50A","2NRANZE9UCmPAS5XVbXL40","24JygzOLM0EmRQeGtFcIcG"]
+songs =["7ouMYWpwJ422jRcDASZB7P","4VqPOruhp5EdPBeR92t6lQ","2takcwOaAZWiXQijPHIx7B"]
 poppy=[]
 spotify.base_search(songs) #trying to solve the get list of ids
 #---------------------------------------------------
 
-
-#1 put it in a while loop
-#2 max ids in a list is 100 to ask the api
-#3 i downloaded the aws cli and configure it, so there shouldn't be anymore the credential error
-#5 i modify the step3, look if it works
-#6 the final output to send to dynamo must be a list of dictionaries
-#6
+#Problems&questions
+#1 Spotify_api wasn't working, so i called the original Spotify_api_all
+#2 watch out to flushdb in redis to have it empty
+#3 batching from sqs? possible it seems i need to resolve the look up to get the several messages.body
+#4 last point is about, batching from spotify, possible? yes, ofc, there is the api endpoint, working? f***** no -.- 
