@@ -6,7 +6,7 @@ import requests
 
 
 client_id = "c08a019d1f3b432eb2d81c880a1f8342"
-client_secret = "49f6363a27fb45ff91746d9563b6c702"
+client_secret = "to insert"
 
 class SpotifyAPI(object):
     access_token = None
@@ -93,18 +93,34 @@ class SpotifyAPI(object):
     def get_album(self, _id):
         return self.get_resource(_id, resource_type='albums')
     
+    def get_tracks(self, query_params):
+        headers = self.get_resource_header()
+        endpoint = "https://api.spotify.com/v1/tracks?ids="+ query_params
+        r = requests.get(endpoint, headers=headers)
+        if  not r.status_code == 200:  
+            return {}
+        return r.json()
+    
     def get_artist(self, _id):
         return self.get_resource(_id, resource_type='artists')
     
     def get_feature(self, _id):
         return self.get_resource(_id, resource_type='audio-features')
     
+    def get_features(self,_ids,resource_type="audio-features",version = "v1"):
+        endpoint = f"https://api.spotify.com/{version}/{resource_type}"
+        headers = self.get_resource_header()
+        r = requests.get(endpoint, headers=headers)
+        if r.status_code not in range(200, 299):
+            return {}
+        return r.json()
+    
     def base_search(self, query_params): # type
         headers = self.get_resource_header()
-        endpoint = "https://api.spotify.com/v1/search"
-        lookup_url = f"{endpoint}?{query_params}"
-        r = requests.get(lookup_url, headers=headers)
-        if r.status_code not in range(200, 299):  
+        endpoint = "https://api.spotify.com/v1/audio-features?ids="+ query_params
+        #lookup_url = f"{endpoint}"query_params
+        r = requests.get(endpoint, headers=headers)
+        if  not r.status_code == 200:  
             return {}
         return r.json()
     

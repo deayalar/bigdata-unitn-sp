@@ -6,7 +6,7 @@ import requests
 
 
 client_id = "c08a019d1f3b432eb2d81c880a1f8342"
-client_secret = "49f6363a27fb45ff91746d9563b6c702"
+client_secret = "to_insert"
 
 class SpotifyAPI(object):
     access_token = None
