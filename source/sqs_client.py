@@ -25,11 +25,12 @@ class SqsClient():
 
 def test():
     sqs_client = SqsClient()
-    sqs_client.send("abc,def,ghi")
-    sqs_client.send("qwe,rty,uio")
-    sqs_client.send("asd,fgh,jkl")
+    #  sqs_client.send("abc,def,ghi")
+    #  sqs_client.send("qwe,rty,uio")
+    #  sqs_client.send("asd,fgh,jkl")
 
     data = sqs_client.get()
-    for i in data:
-        print(i["Body"].split(","))
-#test()
+    print(data)
+#    for i in data:
+#        print(i["Body"].split(","))
+# test()
