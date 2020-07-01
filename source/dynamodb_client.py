@@ -96,7 +96,6 @@ class ChartsLoader():
             start = time.time()
             for country, day in batch:
                 item_tuple = (country, day)
-                # if country in ["il", "th", "ro", "vn", "za", "jp", "in"]:
                 chart, ids = self.get_chart_item(country, day, thread_id)
                 if chart:
                     charts_to_save.append(chart)
@@ -106,7 +105,7 @@ class ChartsLoader():
             try:
                 ids_string = ",".join(ids_to_send)
                 self.sqs.send(ids_string)
-                #  self.dao.save_batch(charts_to_save)
+                self.dao.save_batch(charts_to_save)
             except Exception as e:
                 print(e)
                 logger.error("Cannot save in db thread %d [%s, %s]" % (thread_id, item_tuple))
