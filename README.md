@@ -1,6 +1,13 @@
 # bigdata-unitn-sp
 Big Data project Unitn
 
+Contributors:
+
+David Ayala
+
+Dario Fabiani
+
+
 ## Implications of Covid-19 on music preferences
 The purpose of the project is to implement a big data system that collects, analyses the song’s popularity by looking at Spotify data (accessed with WebApi) in various countries, exploit implications of Covid-19 data to understand if making us staying at home influences music preferences. The output of our study is a set of visualizations made from the batch processing of data coming from different sources. These visualizations are backed on the Pleasure-Arousal-Model proposed by Russell in 1980. It expresses human emotions in a two-dimension space composed by arousal and pleasure. According to the findings of  Helmholz in 2017. These two dimensions can also be interpreted in terms of audio features like energy and valence. Details will be provided along this document.The code of the project can be found on GitLab, This is the repository
 
@@ -16,6 +23,8 @@ Helmholz, Patrick & Siemon, Dominik & Robra-Bissantz, Susanne. (2017). Summer ho
 The output of this solution are visualisations like the one shown above, but instead of having specific songs, we will have countries. This will allow us to visualize in which “mood” the country is. In further sections, we will describe how we found the values that characterise each country to be placed in the two-dimension space. In addition, we also used the data regarding Covid-19, to better visualize which countries were affected by the virus, how they moved within the two-dimensions, on which proportion compared to the others, and provide a useful plot. In the following part we delve into the project choices to actually implement what has been discussed above.
 
 ### Architectural Choices
+
+![Architecture](https://github.com/deayalar/bigdata-unitn-sp/blob/master/source/architecture.jpg)
 
 This solution is built on top of the AWS infrastructure because it avoids the installation of software that can be problematic in local machines and because we can ensure better communication between the different components. On the other hand, we decided to use Spark on top of Databricks to perform the analysis, this cluster also runs on AWS infrastructure.
 
